@@ -12,30 +12,38 @@ struct CreaturesListView: View {
     
     var body: some View {
         NavigationStack {
-            List(0..<creaturesVM.creaturesArray.count, id: \.self) { index in
-                LazyVStack {
-                    NavigationLink {
-                        DetailView(creature: creaturesVM.creaturesArray[index])
-                    } label: {
-                        Text("\(index + 1). \(creaturesVM.creaturesArray[index].name.capitalized)")
-                            .font(.title2)
+            ZStack {
+                List(0..<creaturesVM.creaturesArray.count, id: \.self) { index in
+                    LazyVStack {
+                        NavigationLink {
+                            DetailView(creature: creaturesVM.creaturesArray[index])
+                        } label: {
+                            Text("\(index + 1). \(creaturesVM.creaturesArray[index].name.capitalized)")
+                                .font(.title2)
+                        }
                     }
-                }
-                .onAppear {
-                    if let lastCreature = creaturesVM.creaturesArray.last {
-                        if creaturesVM.creaturesArray[index].name == lastCreature.name && creaturesVM.urlString.hasPrefix("http") {
-                            Task {
-                                await creaturesVM.getData()
+                    .onAppear {
+                        if let lastCreature = creaturesVM.creaturesArray.last {
+                            if creaturesVM.creaturesArray[index].name == lastCreature.name && creaturesVM.urlString.hasPrefix("http") {
+                                Task {
+                                    await creaturesVM.getData()
+                                }
                             }
                         }
                     }
                 }
-            }
-            .listStyle(.plain)
-            .navigationTitle("Pokemon")
-            .toolbar {
-                ToolbarItem(placement: .bottomBar) {
-                    Text("\(creaturesVM.creaturesArray.count) of \(creaturesVM.count) creatures")
+                .listStyle(.plain)
+                .navigationTitle("Pokemon")
+                .toolbar {
+                    ToolbarItem(placement: .bottomBar) {
+                        Text("\(creaturesVM.creaturesArray.count) of \(creaturesVM.count) creatures")
+                    }
+                }
+                
+                if creaturesVM.isLoading {
+                    ProgressView()
+                        .tint(.red)
+                        .scaleEffect(4)
                 }
             }
         }
