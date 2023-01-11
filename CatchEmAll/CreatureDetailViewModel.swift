@@ -10,8 +10,8 @@ import Foundation
 @MainActor
 class CreatureDetailViewModel: ObservableObject {
     private struct Returned: Codable {
-        var height: Double
-        var weight: Double
+        var height: Double?
+        var weight: Double?
         var sprites: Sprite
     }
     
@@ -29,7 +29,7 @@ class CreatureDetailViewModel: ObservableObject {
     }
     
     struct OfficialArtwork: Codable {
-        var front_default: String
+        var front_default: String?
     }
     
     var urlString = ""
@@ -55,9 +55,9 @@ class CreatureDetailViewModel: ObservableObject {
                 return
             }
             
-            self.height = returned.height
-            self.weight = returned.weight
-            self.imageURL = returned.sprites.other.officialArtwork.front_default
+            self.height = returned.height ?? 0
+            self.weight = returned.weight ?? 0
+            self.imageURL = returned.sprites.other.officialArtwork.front_default ?? "n/a" // Don't use empty string — it converts to a valid URL and won't create an error
         } catch {
             print("😡 ERROR: Could not use URL at \(urlString) to get data and response")
         }
