@@ -1,5 +1,5 @@
 //
-//  CreaturesViewModel.swift
+//  CreatureDetailViewModel.swift
 //  CatchEmAll
 //
 //  Created by Dmitry Sharabin on 11.1.23..
@@ -8,16 +8,21 @@
 import Foundation
 
 @MainActor
-class CreaturesViewModel: ObservableObject {
+class CreatureDetailViewModel: ObservableObject {
     private struct Returned: Codable {
-        var count: Int
-        var next: String // TODO: Make it optional
-        var results: [Creature]
+        var height: Double
+        var weight: Double
+        var sprites: Sprite
     }
     
-    @Published var creaturesArray: [Creature] = []
-    @Published var urlString = "https://pokeapi.co/api/v2/pokemon"
-    @Published var count = 0
+    struct Sprite: Codable {
+        var front_default: String
+    }
+    
+    var urlString = ""
+    @Published var height = 0.0
+    @Published var weight = 0.0
+    @Published var imageURL = ""
     
     func getData() async {
         print("🕸️ We are accessing the URL  \(urlString)")
@@ -37,9 +42,9 @@ class CreaturesViewModel: ObservableObject {
                 return
             }
             
-            self.count = returned.count
-            self.urlString = returned.next
-            self.creaturesArray = returned.results
+            self.height = returned.height
+            self.weight = returned.weight
+            self.imageURL = returned.sprites.front_default
         } catch {
             print("😡 ERROR: Could not use URL at \(urlString) to get data and response")
         }
