@@ -9,26 +9,23 @@ import SwiftUI
 
 struct CreaturesListView: View {
     @StateObject var creaturesVM = CreaturesViewModel()
+    @State private var searchText = ""
     
     var body: some View {
         NavigationStack {
             ZStack {
-                List(0..<creaturesVM.creaturesArray.count, id: \.self) { index in
+                List(searchResults) { creature in
                     LazyVStack {
                         NavigationLink {
-                            DetailView(creature: creaturesVM.creaturesArray[index])
+                            DetailView(creature: creature)
                         } label: {
-                            Text("\(index + 1). \(creaturesVM.creaturesArray[index].name.capitalized)")
+                            Text(creature.name.capitalized)
                                 .font(.title2)
                         }
                     }
                     .onAppear {
-                        if let lastCreature = creaturesVM.creaturesArray.last {
-                            if creaturesVM.creaturesArray[index].name == lastCreature.name && creaturesVM.urlString.hasPrefix("http") {
-                                Task {
-                                    await creaturesVM.getData()
-                                }
-                            }
+                        Task {
+                            await creaturesVM.loadNextIfNeeded(creature: creature)
                         }
                     }
                 }
@@ -47,6 +44,7 @@ struct CreaturesListView: View {
                         Text("\(creaturesVM.creaturesArray.count) of \(creaturesVM.count) creatures")
                     }
                 }
+                .searchable(text: $searchText)
                 
                 if creaturesVM.isLoading {
                     ProgressView()
@@ -57,6 +55,16 @@ struct CreaturesListView: View {
         }
         .task {
             await creaturesVM.getData()
+        }
+    }
+    
+    var searchResults: [Creature] {
+        if searchText.isEmpty {
+            return creaturesVM.creaturesArray
+        } else {
+            return creaturesVM.creaturesArray.filter {
+                $0.name.capitalized.contains(searchText)
+            }
         }
     }
 }
